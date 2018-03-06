@@ -1,0 +1,4 @@
+aws s3 cp s3://modharleen/directToDashboard/Resources/ /home/hadoop/ --recursive --include "*"
+aws s3 cp s3://modharleen/directToDashboard/jar/ /home/hadoop/ --recursive --include "*"
+aws s3 cp s3://modharleen/directToDashboard/lib/ /home/hadoop/ --recursive --include "*"
+spark-submit --master yarn --deploy-mode client --class com.pp.mod.directToDashboard --name d2d --jars /home/hadoop/mssql-jdbc-6.1.0.jre8.jar,/home/hadoop/mysql-connector-java-5.1.38.jar,/home/hadoop/ojdbc6.jar,/home/hadoop/postgresql-42.2.1.jar --packages com.typesafe:config:1.3.1 --driver-java-options "-Dconfig.file=\/home\/hadoop\/application.conf" --driver-memory 2G --executor-memory 10G --executor-cores 6 /home/hadoop/directtodashboard_2.11-0.1.jar

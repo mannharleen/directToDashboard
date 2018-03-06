@@ -1,5 +1,7 @@
 package com.pp.mod
 
+import java.io.InputStreamReader
+
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql
 import org.apache.spark.sql.SparkSession
@@ -15,6 +17,8 @@ import scala.util.{Failure, Success}
 object directToDashboard {
 
   val conf = ConfigFactory.load
+  //val reader = new InputStreamReader(fs.open(new Path("./src/main/Resources/application.conf")))
+  //val conf = ConfigFactory.parseReader(reader)
 
   def createDbConfig(dbIdentifier: String): (String,String,String) = {
     val userDB: String = conf.getString(s"$dbIdentifier.db.username")
@@ -77,9 +81,10 @@ object directToDashboard {
 
   def writeHdfs(df: sql.DataFrame, schema_name: String, table_name: String, spark: SparkSession): String = {
     val loc = conf.getString("hdfs.location")
-    println("!!! no of threads "+Thread.activeCount)
-    println("!!! no of cores "+Runtime.getRuntime().availableProcessors())
+    //println("!!! no of threads "+Thread.activeCount)
+    //println("!!! no of cores "+Runtime.getRuntime().availableProcessors())
     println(s"INFO: Writing to hdfs for table $schema_name $table_name")
+    //!!! use append when running on cluster
     //df.withColumn("schema_name", sql.functions.lit(s"$schema_name")).write.mode("ignore").parquet(s"$loc$table_name")
     df.withColumn("schema_name", sql.functions.lit(s"$schema_name")).write.mode("append").parquet(s"$loc$table_name")
     table_name
@@ -156,8 +161,8 @@ object directToDashboard {
     prop.setProperty("user", userDB)
     prop.setProperty("password", passwordDB)
     println(s"INFO: Writing to datamart for table ${table.toUpperCase}")
-    println("<mocking write>")
-    //df.write.mode("overwrite").jdbc(jdbcDB, table, prop)
+    //println("<mocking write>")
+    df.write.mode("overwrite").jdbc(jdbcDB, table, prop)
     /*val future_write_postgre: Future[String] = Future {
       df.write.mode("overwrite").jdbc(jdbcDB, table, prop)
       table
