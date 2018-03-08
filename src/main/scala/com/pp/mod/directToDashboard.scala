@@ -86,13 +86,13 @@ object directToDashboard {
     println(s"INFO: Writing to hdfs for table $schema_name $table_name")
     //!!! use append when running on cluster
     //df.withColumn("schema_name", sql.functions.lit(s"$schema_name")).write.mode("ignore").parquet(s"$loc$table_name")
-    df.withColumn("schema_name", sql.functions.lit(s"$schema_name")).write.mode("append").parquet(s"$loc$table_name")
+    df.withColumn("schema_name", sql.functions.lit(s"$schema_name")).write.mode("append").parquet(s"$loc$table_name/$schema_name")
     table_name
   }
 
   def registerTables(table_name: String, spark: SparkSession): String = {
     val loc = conf.getString("hdfs.location")
-    val df = spark.read.parquet(s"$loc$table_name")
+    val df = spark.read.parquet(s"$loc$table_name/*/")
     df.createOrReplaceTempView(table_name)
     table_name
   }
