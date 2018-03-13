@@ -42,9 +42,29 @@ object directToDashboard {
     prop.setProperty("user", userDB)
     prop.setProperty("password", passwordDB)
 
+    val table_keys: Map[String, String] = (for {
+      items <- conf.getObjectList(s"fisicien.db.tablekeys").asScala
+      item <- items.entrySet().asScala
+    } yield(item.getKey, item.getValue.unwrapped().toString) ).toMap
+
     val list_future_tables: List[Future[String]] =
     tableListDB.map(table => {
-      val future_read  = Future {spark.read.jdbc(jdbcDB, table, prop)}
+      val future_read =
+        // if key can be found in the tableKeys map in the application.conf file
+        //    use jdbc api with lower and upper bounds
+        // else use jdbc without bounds
+        if (table_keys.contains(table.split('.')(1))) {
+          val columnName = table_keys(table.split('.')(1))
+          val bounds = spark.read.jdbc(jdbcDB, s"(select min($columnName), max($columnName) from $table)", prop).first()
+          val lowerBound: Long = bounds.getDecimal(0).longValue()
+          val upperBound = bounds.getDecimal(1).longValue()
+          println(s"INFO: Reading table using $columnName for table $table")
+          Future {spark.read.jdbc(jdbcDB, table, columnName, lowerBound, upperBound, 500, prop)}
+      } else {
+          println(s"INFO: Reading table                   for table $table")
+          Future {spark.read.jdbc(jdbcDB, table, prop)}
+        }
+      //
       //println("!!!"+Thread.activeCount)
       val future_write: Future[String] = future_read.map(df => {
         val (schema_name: String, table_name: String) = (table.split('.')(0), table.split('.')(1))

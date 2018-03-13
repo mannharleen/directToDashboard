@@ -6,6 +6,7 @@ fisicien.db.username=
 fisicien.db.password=
 fisicien.db.driver=oracle.jdbc.driver.OracleDriver
 fisicien.db.tables=["schema1.table1", "schema1.table2"]
+fisicien.db.tablekeys=[{"table1" : "column123"}
 //
 //
 //dataportal.db
