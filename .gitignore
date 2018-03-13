@@ -2,7 +2,7 @@
 lib/*
 project/target/*
 project/project/*
-src/main/Resources/*
+src/main/Resources/*.conf
 target/*
 *.class
 *.log
